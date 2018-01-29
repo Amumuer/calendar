@@ -1,0 +1,23 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+.index{
+  table{
+    width: 100%;
+    max-width: 1200px;
+    tr{
+      th{
+        text-align: center;
+      }
+      td{
+        text-align: center;
+        height: 8vw;
+        font-size: 80px;
+        font-weight: 700;
+        color: rgba(0, 0, 0, 0.10196078431372549);
+
+      }
+    }
+  }
+}
