@@ -11,37 +11,77 @@
     <script src="js/zui.js"></script>
     <script src="js/vue.js"></script>
 </head>
-<body>
+<body style="font-size: 16px;">
 <div id="el" class="index">
     <div class="calendar">
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th>星期日</th>
-                <th>星期一</th>
-                <th>星期二</th>
-                <th>星期三</th>
-                <th>星期四</th>
-                <th>星期五</th>
-                <th>星期六</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(v,index) in calendar">
-                <!--<td v-for="(v2,index2) in v" v-if="JSON.stringify(v2) == '{}'">{{ v2 }}</td>-->
-                <td v-for="(v2,index2) in v">{{ v2.date }}</td>
-            </tr>
-            </tfoot>
-        </table>
+        <div class="search">
+            <div class="row">
+                <div class="col-lg-2">
+                    <div class="input-group">
+                        <input @input="input($event)" type="text" class="form-control" placeholder="Search for...">
+                        <span @click="search" class="input-group-btn">
+        <button class="btn btn-default" type="button">跳转到</button>
+      </span>
+                    </div><!-- /input-group -->
+                </div><!-- /.col-lg-6 -->
+                <div class="col-lg-3">
+                    <h1 style="margin: 0;">{{ title }}</h1>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 20px;" class="main row">
+            <div class="col-lg-8 col-md-8">
+                <table class="table table-bordered ">
+                    <thead>
+                    <tr>
+                        <th>星期日</th>
+                        <th>星期一</th>
+                        <th>星期二</th>
+                        <th>星期三</th>
+                        <th>星期四</th>
+                        <th>星期五</th>
+                        <th>星期六</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(v,index) in calendar">
+                        <!--<td v-for="(v2,index2) in v" v-if="JSON.stringify(v2) == '{}'">{{ v2 }}</td>-->
+                        <td :class="successDate.indexOf(v2.date) == -1? failDate.indexOf(v2.date) == -1? '':'fail':'success'" v-for="(v2,index2) in v">
+                            {{ v2.date }}
+                            <ul>
+                                <li @click="success(v2)"><img src="images/success.png" alt=""></li>
+                                <li @click="fail(v2)"><img src="images/fail.png" alt=""></li>
+                                <li @click="quit(v2)"><img src="images/return.png" alt=""></li>
+                            </ul>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">备忘录</h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul>
+                            <li>第一!绝对不意气用事!</li>
+                            <li>第二!绝对不漏判任何一件坏事!</li>
+                            <li>第三!绝对裁判的公正漂亮!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>
 <script>
-    var cur_year,cur_month,cur_date,weeks_ch
+    var cur_year, cur_month, cur_date, weeks_ch
     //利用构造函数创建对象
-    function calendar(date,week){
+    function calendar(date, week) {
 //        this.date=cur_year+'-'+cur_month+'-'+date;
-        this.date=date;
+        this.date = date;
 //        if(date==cur_date){
 //            this.week = "今天";
 //        }else if(date==cur_date+1){
@@ -51,34 +91,40 @@
 //        }
     }
 
-    var vm=new Vue({
-        el:'#el',
-        data:{
-            calendar:[]
+    var vm = new Vue({
+        el: '#el',
+        data: {
+            calendar: [],
+            date:'',
+            title:'',
+            successDate:[],
+            failDate:[]
         },
-        mounted:function () {
+        mounted: function () {
             this.init()
         },
-        methods:{
-            init:function () {
-                const date = new Date();
+        methods: {
+            init: function (dateStr) {
+                const date = new Date(dateStr || new Date());
                 cur_year = date.getFullYear();
                 cur_month = date.getMonth() + 1;
-                cur_date=date.getDate();
+                cur_date = date.getDate();
+                this.title=cur_year+'/'+cur_month+'/'+cur_date
+                console.log(cur_year,cur_month,cur_date)
                 weeks_ch = ['日', '一', '二', '三', '四', '五', '六'];
 
                 //当前月份的天数
-                var monthLength= this.getThisMonthDays(cur_year, cur_month)
+                var monthLength = this.getThisMonthDays(cur_year, cur_month)
                 //当前月份的第一天是星期几
                 var week = this.getFirstDayOfWeek(cur_year, cur_month)
                 var x = week;
-                var flag=[]
-                var SecArr=[]
-                var start=0;
-                for(var i=1;i<=monthLength;i++){
+                var flag = []
+                var SecArr = []
+                var start = 0;
+                for (var i = 1; i <= monthLength; i++) {
                     //当循环完一周后，初始化再次循环
-                    if(x>6){
-                        x=0;
+                    if (x > 6) {
+                        x = 0;
                     }
                     //利用构造函数创建对象
                     flag[i] = new calendar(i, [weeks_ch[x]][0])
@@ -86,28 +132,59 @@
                 }
                 console.log(flag);
                 flag.shift()
-                for(var i=0;i<Math.ceil(flag.length+week/7);i++){
-                    if(i==0){
-                        SecArr.push(flag.slice(start,start+7-week))
-                        start=start+7-week
-                    }else{
-                        SecArr.push(flag.slice(start,start+7))
-                        start=start+7
+                for (var i = 0; i < Math.ceil(flag.length + week / 7); i++) {
+                    if (i == 0) {
+                        SecArr.push(flag.slice(start, start + 7 - week))
+                        start = start + 7 - week
+                    } else {
+                        SecArr.push(flag.slice(start, start + 7))
+                        start = start + 7
                     }
                 }
-//                console.log(week);
-//                console.log('111111111111');
-                for(var i=0;i<week;i++){
-                    SecArr[0].unshift({date:''})
+
+                for (var i = 0; i < week; i++) {
+                    SecArr[0].unshift({date: ''})
                 }
-                this.calendar=SecArr
+                this.calendar = SecArr
             },
-            getThisMonthDays:function(year, month) {
+            getThisMonthDays: function (year, month) {
                 return new Date(year, month, 0).getDate();
             },
             //计算一个月的第一天是星期几
-            getFirstDayOfWeek:function(year, month) {
+            getFirstDayOfWeek: function (year, month) {
                 return new Date(Date.UTC(year, month - 1, 1)).getDay();
+            },
+            //更新输入框日期
+            input:function (e) {
+                console.log(e.target.value);
+                this.date=e.target.value
+            },
+            //点击搜索
+            search:function () {
+                console.log(this.date);
+                this.init(this.date)
+            }
+            ,
+            //点击成功
+            success:function (e) {
+                if(this.successDate.indexOf(e.date) ==-1 && this.failDate.indexOf(e.date) ==-1){
+                    this.successDate.push(e.date)
+                }
+            },
+            //撤销
+            quit:function (e) {
+                if(this.successDate.indexOf(e.date)!=-1){
+                    this.successDate.splice(this.successDate.indexOf(e.date),1)
+                }
+                if(this.failDate.indexOf(e.date)!=-1){
+                    this.failDate.splice(this.failDate.indexOf(e.date),1)
+                }
+            },
+            //点击失败
+            fail:function (e) {
+                if(this.successDate.indexOf(e.date) ==-1 && this.failDate.indexOf(e.date) ==-1){
+                    this.failDate.push(e.date)
+                }
             }
         }
     })
