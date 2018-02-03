@@ -46,13 +46,20 @@
                     <tbody>
                     <tr v-for="(v,index) in calendar">
                         <!--<td v-for="(v2,index2) in v" v-if="JSON.stringify(v2) == '{}'">{{ v2 }}</td>-->
-                        <td :class="successDate.indexOf(v2.date) == -1? failDate.indexOf(v2.date) == -1? '':'fail':'success'" v-for="(v2,index2) in v">
+                        <td :class="successDate.indexOf(v2.date) == -1? failDate.indexOf(v2.date) == -1? '':'fail':'success'"
+                            v-for="(v2,index2) in v">
                             {{ v2.date }}
-                            <ul>
+                            <ul v-if="v2.date">
                                 <li @click="success(v2)"><img src="images/success.png" alt=""></li>
                                 <li @click="fail(v2)"><img src="images/fail.png" alt=""></li>
                                 <li @click="quit(v2)"><img src="images/return.png" alt=""></li>
                             </ul>
+                            <div v-if="v2.date" @click="progress($event)" class="progress">
+                                <div class="progress-bar" role="progressbar" aria-valuenow="40" aria-valuemin="0"
+                                     aria-valuemax="100" style="width: 0%">
+                                    <span class="sr-only">40% Complete (success)</span>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                     </tfoot>
@@ -95,10 +102,10 @@
         el: '#el',
         data: {
             calendar: [],
-            date:'',
-            title:'',
-            successDate:[],
-            failDate:[]
+            date: '',
+            title: '',
+            successDate: [],
+            failDate: []
         },
         mounted: function () {
             this.init()
@@ -109,8 +116,8 @@
                 cur_year = date.getFullYear();
                 cur_month = date.getMonth() + 1;
                 cur_date = date.getDate();
-                this.title=cur_year+'/'+cur_month+'/'+cur_date
-                console.log(cur_year,cur_month,cur_date)
+                this.title = cur_year + '/' + cur_month + '/' + cur_date
+                console.log(cur_year, cur_month, cur_date)
                 weeks_ch = ['日', '一', '二', '三', '四', '五', '六'];
 
                 //当前月份的天数
@@ -155,36 +162,73 @@
                 return new Date(Date.UTC(year, month - 1, 1)).getDay();
             },
             //更新输入框日期
-            input:function (e) {
+            input: function (e) {
                 console.log(e.target.value);
-                this.date=e.target.value
+                this.date = e.target.value
             },
             //点击搜索
-            search:function () {
+            search: function () {
                 console.log(this.date);
                 this.init(this.date)
             }
             ,
             //点击成功
-            success:function (e) {
-                if(this.successDate.indexOf(e.date) ==-1 && this.failDate.indexOf(e.date) ==-1){
+            success: function (e) {
+                if (this.successDate.indexOf(e.date) == -1 && this.failDate.indexOf(e.date) == -1) {
                     this.successDate.push(e.date)
                 }
             },
             //撤销
-            quit:function (e) {
-                if(this.successDate.indexOf(e.date)!=-1){
-                    this.successDate.splice(this.successDate.indexOf(e.date),1)
+            quit: function (e) {
+                if (this.successDate.indexOf(e.date) != -1) {
+                    this.successDate.splice(this.successDate.indexOf(e.date), 1)
                 }
-                if(this.failDate.indexOf(e.date)!=-1){
-                    this.failDate.splice(this.failDate.indexOf(e.date),1)
+                if (this.failDate.indexOf(e.date) != -1) {
+                    this.failDate.splice(this.failDate.indexOf(e.date), 1)
                 }
             },
             //点击失败
-            fail:function (e) {
-                if(this.successDate.indexOf(e.date) ==-1 && this.failDate.indexOf(e.date) ==-1){
+            fail: function (e) {
+                if (this.successDate.indexOf(e.date) == -1 && this.failDate.indexOf(e.date) == -1) {
                     this.failDate.push(e.date)
                 }
+            },
+            //调整进度条
+            progress: function (e) {
+//                console.log($(e.currentTarget.children));
+                $(e.currentTarget.children).removeClass('green yellow red')
+                var num=(this.getMousePos().x-parseFloat(this.getPoint(e.currentTarget)))/parseFloat($(e.currentTarget).width())*100;
+                $(e.currentTarget.children).css({
+                    width:(this.getMousePos().x-parseFloat(this.getPoint(e.currentTarget)))/parseFloat($(e.currentTarget).width())*100+'%'
+                })
+                if(num>=0 && num<=33){
+                    $(e.currentTarget.children).addClass('green')
+                }else if(num >=33 && num <=66){
+                    $(e.currentTarget.children).addClass('yellow')
+
+                }else if(num>66){
+                    $(e.currentTarget.children).addClass('red')
+                }
+//                console.log((this.getMousePos().x-parseFloat(this.getPoint(e.currentTarget)))/parseFloat($(e.currentTarget).width())*100);
+            },
+            getPoint: function (obj) { //获取某元素以浏览器左上角为原点的坐标
+                var t = obj.offsetTop; //获取该元素对应父容器的上边距
+                var l = obj.offsetLeft; //对应父容器的上边距
+                //判断是否有父容器，如果存在则累加其边距
+                while (obj = obj.offsetParent) {//等效 obj = obj.offsetParent;while (obj != undefined)
+                    t += obj.offsetTop; //叠加父容器的上边距
+                    l += obj.offsetLeft; //叠加父容器的左边距
+                }
+                return l;
+            },
+            //获取鼠标坐标
+            getMousePos: function (event) {
+                var e = event || window.event;
+                var scrollX = document.documentElement.scrollLeft || document.body.scrollLeft;
+                var scrollY = document.documentElement.scrollTop || document.body.scrollTop;
+                var x = e.pageX || e.clientX + scrollX;
+                var y = e.pageY || e.clientY + scrollY;
+                return {'x': x, 'y': y};
             }
         }
     })

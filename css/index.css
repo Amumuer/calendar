@@ -2,6 +2,16 @@
   margin: 0;
   padding: 0; }
 
+.index .progress {
+  height: 8px; }
+  .index .progress .progress-bar {
+    width: 0; }
+  .index .progress .green {
+    background-color: green; }
+  .index .progress .yellow {
+    background-color: yellow; }
+  .index .progress .red {
+    background-color: red; }
 .index .search {
   margin-top: 20px;
   margin-bottom: 20px; }
