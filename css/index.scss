@@ -18,9 +18,37 @@
       background-color: red;
     }
   }
+  .remark-title{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    h1{
+      margin: 0;
+      cursor: pointer;
+    }
+  }
   .search{
     margin-top: 20px;
     margin-bottom: 20px;
+    .row{
+      padding: 30px;
+      .br{
+        display: none;
+      }
+      .pager{
+        margin: 0;
+      }
+      @media (max-width: 1580px) {
+        .col-1200{
+          width: 135px;
+        }
+      }
+      @media (max-width: 1400px) {
+        .br{
+          display: block;
+        }
+      }
+    }
   }
   table{
     width: 100%;

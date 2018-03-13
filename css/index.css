@@ -12,9 +12,28 @@
     background-color: yellow; }
   .index .progress .red {
     background-color: red; }
+.index .remark-title {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between; }
+  .index .remark-title h1 {
+    margin: 0;
+    cursor: pointer; }
 .index .search {
   margin-top: 20px;
   margin-bottom: 20px; }
+  .index .search .row {
+    padding: 30px; }
+    .index .search .row .br {
+      display: none; }
+    .index .search .row .pager {
+      margin: 0; }
+    @media (max-width: 1580px) {
+      .index .search .row .col-1200 {
+        width: 135px; } }
+    @media (max-width: 1400px) {
+      .index .search .row .br {
+        display: block; } }
 .index table {
   width: 100%; }
   .index table tr th {

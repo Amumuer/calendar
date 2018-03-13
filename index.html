@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <title>Title</title>
+    <title>自我管理日历</title>
     <link rel="stylesheet" href="css/zui.min.css">
     <link rel="stylesheet" href="css/index.css">
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
@@ -16,17 +16,24 @@
     <div class="calendar">
         <div class="search">
             <div class="row">
-                <div class="col-lg-2">
+                <div style="" class="col-lg-2">
                     <div class="input-group">
-                        <input @input="input($event)" type="text" class="form-control" placeholder="Search for...">
+                        <input @input="input($event)" type="date" class="form-control" placeholder="Search for...">
                         <span @click="search" class="input-group-btn">
         <button class="btn btn-default" type="button">跳转到</button>
       </span>
                     </div><!-- /input-group -->
                 </div><!-- /.col-lg-6 -->
-                <div class="col-lg-3">
+                <br class="br">
+                <br class="br">
+                <div style="text-align: center;" class="col-lg-1 col-1200">
                     <h1 style="margin: 0;">{{ title }}</h1>
                 </div>
+                <ul class="pager col-lg-3">
+                    <li @click="back" class="previous"><a href="javascript:;">«</a></li>
+                    <li @click="goCurrent"><a href="javascript:;">定位到当前</a></li>
+                    <li @click="next" class="next"><a href="javascript:;">»</a></li>
+                </ul>
             </div>
         </div>
         <div style="padding: 20px;" class="main row">
@@ -67,16 +74,16 @@
             </div>
             <div class="col-lg-4 col-md-4">
                 <div class="panel panel-default">
-                    <div class="panel-heading">
+                    <div class="panel-heading remark-title">
                         <h3 class="panel-title">备忘录</h3>
+                        <h1 @click="addLi">+</h1>
                     </div>
                     <div class="panel-body">
-                        <ul>
-                            <li>第一!绝对不意气用事!</li>
-                            <li>第二!绝对不漏判任何一件坏事!</li>
-                            <li>第三!绝对裁判的公正漂亮!</li>
+                        <ul class="remark">
+                            <li :data-index="index" @click="editLi($event)" v-for="(v,index) in console" v-html="v"></li>
                         </ul>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -87,17 +94,10 @@
     var cur_year, cur_month, cur_date, weeks_ch
     //利用构造函数创建对象
     function calendar(date, week) {
-//        this.date=cur_year+'-'+cur_month+'-'+date;
         this.date = date;
-//        if(date==cur_date){
-//            this.week = "今天";
-//        }else if(date==cur_date+1){
-//            this.week = "明天";
-//        }else{
-//            this.week = '星期' + week;
-//        }
     }
 
+    console.log(NaN+'');
     var vm = new Vue({
         el: '#el',
         data: {
@@ -105,7 +105,10 @@
             date: '',
             title: '',
             successDate: [],
-            failDate: []
+            failDate: [],
+            console:['第一!绝对不意气用事!','第二!绝对不漏判任何一件坏事!','第三!绝对裁判的公正漂亮!'],
+            oldConsole:'',
+            oldIndex:undefined
         },
         mounted: function () {
             this.init()
@@ -137,7 +140,6 @@
                     flag[i] = new calendar(i, [weeks_ch[x]][0])
                     x++;
                 }
-                console.log(flag);
                 flag.shift()
                 for (var i = 0; i < Math.ceil(flag.length + week / 7); i++) {
                     if (i == 0) {
@@ -154,6 +156,42 @@
                 }
                 this.calendar = SecArr
             },
+            //上一个月份
+            back:function () {
+                var currentArr=this.title.split('/')
+                currentArr[1]>1? currentArr[1]--:currentArr[0]--? currentArr[1]=12 : currentArr[1]=12;
+                this.init(currentArr.join('-'))
+            },
+            //下一个月份
+            next:function () {
+                var currentArr=this.title.split('/')
+                currentArr[1]>=12? currentArr[0]++? currentArr[1]=1:currentArr[1]=1:currentArr[1]++;
+                this.init(currentArr.join('-'))
+            },
+            //定位到当前
+            goCurrent:function () {
+                this.init()
+            },
+            //添加备忘
+            addLi:function () {
+                this.console.push('<input type="text" placeholder="请输入备忘内容">')
+            },
+            //编辑备忘录
+            editLi:function (e) {
+                //点击空白处时
+                if(e.srcElement.innerText=="" && $('.remark li').eq($('.remark li').length - 1).find('input').val()==undefined){
+                    e.srcElement.innerHTML=$('.remark li').eq(this.oldIndex).find('input').val()
+                    return
+                }else if(e.srcElement.innerText!=this.oldConsole){
+                    //点击到其他li标签时
+                    $('.remark li').eq(this.oldIndex).html($('.remark li').eq(this.oldIndex).find('input').val())
+                }else if($('.remark li').eq($('.remark li').length-1).find('input').val()){
+                    e.srcElement.innerHTML=$('.remark li').eq($('.remark li').length-1).find('input').val()
+                }
+                this.oldConsole=e.srcElement.innerText
+                this.oldIndex=+e.srcElement.dataset.index
+                e.srcElement.innerHTML='<input type="text" value="'+e.srcElement.innerText+'">'
+            },
             getThisMonthDays: function (year, month) {
                 return new Date(year, month, 0).getDate();
             },
@@ -168,7 +206,8 @@
             },
             //点击搜索
             search: function () {
-                console.log(this.date);
+
+
                 this.init(this.date)
             }
             ,
@@ -232,6 +271,5 @@
             }
         }
     })
-    console.log(vm);
 </script>
 </html>
